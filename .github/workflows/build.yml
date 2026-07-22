@@ -109,4 +109,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: KasraUltimate-Dylib
-        path: KasraMod/.theos/obj/KasraUltimate.dylib
+        path: KasraMod/.theos/obj/debug-iphoneos/KasraUltimate.dylib
