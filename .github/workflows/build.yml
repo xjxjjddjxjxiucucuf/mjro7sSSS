@@ -19,6 +19,9 @@ jobs:
         echo "THEOS=$HOME/theos" >> $GITHUB_ENV
         echo "$HOME/theos/bin" >> $GITHUB_PATH
 
+    - name: Install ldid
+      run: brew install ldid
+
     - name: Create Source Files
       run: |
         mkdir -p KasraMod
@@ -93,16 +96,12 @@ jobs:
         KasraUltimate_FRAMEWORKS = UIKit Foundation CoreGraphics
 
         include $(THEOS_MAKE_PATH)/library.mk
-        
-        after-all::
-        	@rm -f $(THEOS_OBJ_DIR)/$(LIBRARY_NAME).dylib.unsigned
         EOF
 
     - name: Compile Dylib
       run: |
         cd KasraMod
-        export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        make STRIP_INCLUDES=0 LDID=: CODESIGN=:
+        make
       env:
         ADDITIONAL_CFLAGS: "-Wno-error"
 
