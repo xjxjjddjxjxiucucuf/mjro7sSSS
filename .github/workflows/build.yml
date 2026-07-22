@@ -76,7 +76,7 @@ jobs:
         @end
 
         __attribute__((constructor)) void init_mod() {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_7)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [[KasraFloatingMenu sharedInstance] setupMenu];
             });
         }
@@ -92,7 +92,6 @@ jobs:
         KasraUltimate_FILES = Tweak.mm
         KasraUltimate_FRAMEWORKS = UIKit Foundation CoreGraphics
 
-        # تجاوز نهائي لأداة التوقيع عبر حذف أمر الـ ldid من مسار التنفيذ المؤقت
         include $(THEOS_MAKE_PATH)/library.mk
         
         after-all::
@@ -103,7 +102,6 @@ jobs:
       run: |
         cd KasraMod
         export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        # خداع ثيوس بوهم توقيع فارغ لا يتطلب ldid
         make STRIP_INCLUDES=0 LDID=: CODESIGN=:
       env:
         ADDITIONAL_CFLAGS: "-Wno-error"
