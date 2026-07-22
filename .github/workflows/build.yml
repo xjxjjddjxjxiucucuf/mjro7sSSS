@@ -1,0 +1,93 @@
+name: Build iOS Dylib
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+  
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Theos
+      run: |
+        git clone --recursive https://github.com/theos/theos.git $HOME/theos
+        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+        echo "$HOME/theos/bin" >> $GITHUB_PATH
+
+    - name: Create Source Files
+      run: |
+        mkdir -p KasraMod
+        cd KasraMod
+        
+        cat << 'EOF' > Tweak.mm
+        #import <UIKit/UIKit.h>
+        #include <mach-o/dyld.h>
+        #include <sys/sysctl.h>
+
+        __attribute__((constructor)) void kasra_loader() {
+            struct kinfo_proc info;
+            int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+            size_t size = sizeof(info);
+            if (sysctl(mib, 4, &info, &size, NULL, 0) == 0) {
+                if (info.kp_proc.p_flag & P_TRACED) { exit(0); }
+            }
+        }
+
+        @interface KasraFloatingMenu : NSObject
+        @property (strong, nonatomic) UIButton *floatingButton;
+        @property (strong, nonatomic) UIView *menuView;
+        @end
+
+        @implementation KasraFloatingMenu
+        + (instancetype)sharedInstance {
+            static KasraFloatingMenu *sharedInstance = nil;
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{ sharedInstance = [[KasraFloatingMenu alloc] init]; });
+            return sharedInstance;
+        }
+        - (void)setupMenu {
+            UIWindow *window = [UIApplication sharedApplication].keyWindow;
+            self.floatingButton = [UIButton buttonWithType:UIButtonTypeCustom];
+            self.floatingButton.frame = CGRectMake(50, 100, 50, 50);
+            [self.floatingButton setTitle:@"⚙️" forState:UIControlStateNormal];
+            self.floatingButton.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.6f];
+            self.floatingButton.layer.cornerRadius = 25;
+            [window addSubview:self.floatingButton];
+        }
+        @end
+
+        __attribute__((constructor)) void init_mod() {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [[KasraFloatingMenu sharedInstance] setupMenu];
+            });
+        }
+        EOF
+
+        cat << 'EOF' > Makefile
+        TARGET = iphone:clang:latest:14.0
+        ARCHS = arm64
+        
+        include $(THEOS)/makefiles/common.mk
+
+        LIBRARY_NAME = KasraUltimate
+        KasraUltimate_FILES = Tweak.mm
+        KasraUltimate_FRAMEWORKS = UIKit Foundation CoreGraphics
+
+        include $(THEOS_MAKE_PATH)/library.mk
+        EOF
+
+    - name: Compile Dylib
+      run: |
+        cd KasraMod
+        make
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: KasraUltimate-Dylib
+        path: KasraMod/.theos/obj/KasraUltimate.dylib
