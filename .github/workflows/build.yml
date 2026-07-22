@@ -56,16 +56,14 @@ jobs:
                 for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
                     if (scene.activationState == UISceneActivationStateForegroundActive) {
                         for (UIWindow *win in scene.windows) {
-                            if (win.isKeyWindow) {
-                                window = win;
-                                break;
-                            }
+                            window = win;
+                            break;
                         }
                     }
                 }
             }
             if (!window) {
-                window = [UIApplication sharedApplication].keyWindow;
+                window = [UIApplication sharedApplication].windows.firstObject;
             }
             
             self.floatingButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -94,8 +92,9 @@ jobs:
         KasraUltimate_FILES = Tweak.mm
         KasraUltimate_FRAMEWORKS = UIKit Foundation CoreGraphics
         
-        # تعطيل التوقيع لتجنب خطأ ldid
-        CODESIGN = :
+        # تعطيل التوقيع نهائياً لمنع خطأ ldid
+        CODESIGN = true
+        _CODESIGN = true
 
         include $(THEOS_MAKE_PATH)/library.mk
         EOF
@@ -103,7 +102,7 @@ jobs:
     - name: Compile Dylib
       run: |
         cd KasraMod
-        export ADDITIONAL_CFLAGS="-Wno-error=deprecated-declarations"
+        export ADDITIONAL_CFLAGS="-Wno-error"
         make
 
     - name: Upload Artifact
