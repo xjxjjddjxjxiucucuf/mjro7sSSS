@@ -102,7 +102,7 @@ jobs:
       run: |
         cd KasraMod
         make
-        cp .theos/obj/debug-iphoneos/KasraUltimate.dylib ../KasraUltimate.dylib
+        cp .theos/obj/debug/KasraUltimate.dylib ../KasraUltimate.dylib
       env:
         ADDITIONAL_CFLAGS: "-Wno-error"
 
