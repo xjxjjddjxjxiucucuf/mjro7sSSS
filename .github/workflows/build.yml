@@ -105,8 +105,11 @@ jobs:
       env:
         ADDITIONAL_CFLAGS: "-Wno-error"
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - name: Release Dylib
+      uses: softprops/action-gh-release@v1
       with:
-        name: KasraUltimate-Dylib
-        path: KasraMod/.theos/obj/debug-iphoneos/KasraUltimate.dylib
+        files: KasraMod/.theos/obj/debug-iphoneos/KasraUltimate.dylib
+        tag_name: v1.0.0
+        overwrite: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
