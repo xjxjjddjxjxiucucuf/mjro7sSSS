@@ -93,6 +93,9 @@ jobs:
         LIBRARY_NAME = KasraUltimate
         KasraUltimate_FILES = Tweak.mm
         KasraUltimate_FRAMEWORKS = UIKit Foundation CoreGraphics
+        
+        # تعطيل التوقيع لتجنب خطأ ldid
+        CODESIGN = :
 
         include $(THEOS_MAKE_PATH)/library.mk
         EOF
