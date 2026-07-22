@@ -51,7 +51,23 @@ jobs:
             return sharedInstance;
         }
         - (void)setupMenu {
-            UIWindow *window = [UIApplication sharedApplication].keyWindow;
+            UIWindow *window = nil;
+            if (@available(iOS 13.0, *)) {
+                for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                    if (scene.activationState == UISceneActivationStateForegroundActive) {
+                        for (UIWindow *win in scene.windows) {
+                            if (win.isKeyWindow) {
+                                window = win;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!window) {
+                window = [UIApplication sharedApplication].keyWindow;
+            }
+            
             self.floatingButton = [UIButton buttonWithType:UIButtonTypeCustom];
             self.floatingButton.frame = CGRectMake(50, 100, 50, 50);
             [self.floatingButton setTitle:@"⚙️" forState:UIControlStateNormal];
@@ -84,6 +100,7 @@ jobs:
     - name: Compile Dylib
       run: |
         cd KasraMod
+        export ADDITIONAL_CFLAGS="-Wno-error=deprecated-declarations"
         make
 
     - name: Upload Artifact
